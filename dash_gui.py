@@ -86,10 +86,10 @@ def get_uuid_from_row(row):
 @app.callback(
     Output('datatable-interactivity-container', "children"),
     [Input('datatable-interactivity', "derived_virtual_data"),
-     Input('datatable-interactivity', "derived_virtual_selected_rows")])
-def update_graphs(rows, derived_virtual_selected_rows):
+     Input('datatable-interactivity', "selected_rows")])
+def update_graphs(rows, selected_rows):
     # When the table is first rendered, `derived_virtual_data` and
-    # `derived_virtual_selected_rows` will be `None`. This is due to an
+    # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
     # calls the dependent callbacks when the component is first rendered).
     # So, if `rows` is `None`, then the component was just rendered
@@ -97,25 +97,26 @@ def update_graphs(rows, derived_virtual_selected_rows):
     # Instead of setting `None` in here, you could also set
     # `derived_virtual_data=df.to_rows('dict')` when you initialize
     # the component.
-    if derived_virtual_selected_rows is None:
-        derived_virtual_selected_rows = []
+    if selected_rows is None:
+        selected_rows = []
 
     # dff = df if rows is None else pd.DataFrame(rows)
     global downloaded_xs_data
-    print('derived_virtual_selected_rows', derived_virtual_selected_rows)
+    print('selected_rows', selected_rows)
 
     if len(downloaded_xs_data) > 0:
         print('setting all to plot=False')
-        for entry in derived_virtual_selected_rows:
-        # for entry in range(0 , 15):
-            row = df.iloc[[entry]]
-            uuid = get_uuid_from_row(row)
-            if uuid in downloaded_xs_data.keys():
-                downloaded_xs_data[uuid]['plot'] = False
+        for entry in selected_rows:
+    #     # for entry in range(0 , 15):
+    #         row = df.iloc[[entry]]
+    #         uuid = get_uuid_from_row(row)
+            if entry in downloaded_xs_data.keys():
+                downloaded_xs_data[entry]['plot'] = False
 
-    for entry in derived_virtual_selected_rows:
+    for entry in selected_rows:
         row = df.iloc[[entry]]
-        print('    ', entry)
+        # print('    ', row)
+        print('    adding ', entry)
 
 
         uuid = get_uuid_from_row(row)
@@ -135,18 +136,19 @@ def update_graphs(rows, derived_virtual_selected_rows):
         #     reaction_description,
         #     library]
         # )
-        downloaded_xs_data[uuid] = xs
+        downloaded_xs_data[entry] = xs
 
     all_x_y_data = []
     for k, v in downloaded_xs_data.items():
-
+        print('    plotting ', k)
         # print("downloaded_xs_data[k]['plot']", downloaded_xs_data[k]['plot'].array[0])
         # print("downloaded_xs_data[k]['plot']", type(downloaded_xs_data[k]['plot'].array[0]))
-        if downloaded_xs_data[k]['plot'].array[0] == True:
+        # if downloaded_xs_data[k]['plot'].array[0] == True:
             # print('got here')
-            print('        found plot=True', k)
-            # print('uuid is ', downloaded_xs_data[k]['uuid'].array[0])
-            # print('uuid is ', type(downloaded_xs_data[k]['uuid'].array[0]))
+        # print('        found plot=True', k)
+        # print('uuid is ', downloaded_xs_data[k]['uuid'].array[0])
+        # print('uuid is ', type(downloaded_xs_data[k]['uuid'].array[0]))
+        if k in selected_rows:
             all_x_y_data.append(
                 {
                     "y": downloaded_xs_data[k]["cross section"],
