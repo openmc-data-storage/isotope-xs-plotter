@@ -5,7 +5,8 @@ import openmc_data_to_json as odj
 
 odd.just_in_time_library_generator(
     libraries='TENDL-2019',
-    elements=['Li', 'Be', 'Na'], #'all',
+    # elements=['Li', 'Be', 'Na'],
+    elements='all',
     destination='TENDL-2019'
 )
 

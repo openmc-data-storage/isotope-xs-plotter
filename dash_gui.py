@@ -12,12 +12,12 @@ import json
 
 f = open('TENDL-2019_json/TENDL-2019_index.json')
 data = json.load(f)
-print(len(data))
-df = pd.json_normalize(data[0])
+print('number of entries', len(data))
+df = pd.json_normalize(data)
 
 # df = pd.read_json('TENDL-2019_json/TENDL-2019_index.json')
 
-print(df)
+# print(df)
 downloaded_xs_data={}
 
 app = dash.Dash(__name__)
@@ -51,9 +51,37 @@ app.layout = html.Div([
 )
 def update_styles(selected_columns):
     return [{
-        'if': { 'column_id': i },
+        'if': { 'column_id': i},
         'background_color': '#D2F3FF'
     } for i in selected_columns]
+
+def get_uuid_from_row(row):
+    atomic_symbol = str(row['Proton number / element']).split()[2]
+    mass_number = str(int(row['Mass number']))
+    library = row['Library'].to_string().split()[1] # not sure why the split is needed
+    incident_particle_symbol = 'n'
+    reaction = row['MT number / reaction products'].to_string().split()[1]
+    reaction_description = row['MT number / reaction products'].to_string().split()[0]
+    
+    if library == 'TENDL-2019':
+        temperature = '294K'
+    else:
+        temperature = '300K' # FENDL 3.1d
+
+    # print('atomic_symbol',atomic_symbol)
+    # print('mass_number',mass_number)
+    # print('library',library)
+    # print('reaction',reaction)
+
+    uuid = '_'.join([
+        atomic_symbol,
+        mass_number,
+        library, 
+        incident_particle_symbol,
+        str(int(reaction)),
+        str(temperature)]
+    )
+    return uuid
 
 @app.callback(
     Output('datatable-interactivity-container', "children"),
@@ -73,69 +101,81 @@ def update_graphs(rows, derived_virtual_selected_rows):
         derived_virtual_selected_rows = []
 
     # dff = df if rows is None else pd.DataFrame(rows)
+    global downloaded_xs_data
+    print('derived_virtual_selected_rows', derived_virtual_selected_rows)
 
-    print(derived_virtual_selected_rows)
+    if len(downloaded_xs_data) > 0:
+        print('setting all to plot=False')
+        for entry in derived_virtual_selected_rows:
+        # for entry in range(0 , 15):
+            row = df.iloc[[entry]]
+            uuid = get_uuid_from_row(row)
+            if uuid in downloaded_xs_data.keys():
+                downloaded_xs_data[uuid]['plot'] = False
 
     for entry in derived_virtual_selected_rows:
         row = df.iloc[[entry]]
-        print(row)
+        print('    ', entry)
 
-        atomic_symbol = str(row['Proton number / element']).split()[2]
-        mass_number = str(int(row['Mass number']))
-        library = row['Library'].to_string().split()[1] # not sure why the split is needed
-        incident_particle_symbol = 'n'
-        reaction = row['MT number / reaction products'].to_string().split()[1]
-        
-        if library == 'TENDL-2019':
-            temperature = '294K'
-        else:
-            temperature = '300K' # FENDL 3.1d
 
-        print('atomic_symbol',atomic_symbol)
-        print('mass_number',mass_number)
-        print('library',library)
-        print('reaction',reaction)
-    
-        uuid = '_'.join([atomic_symbol, mass_number, library, 
-                         incident_particle_symbol,
-                         str(int(reaction)), str(temperature)])
+        uuid = get_uuid_from_row(row)
+        library = row['Library'].to_string().split()[1]
 
         fn = library+'_json/'+uuid+'.json'
-        print('filename loading', fn)
+        # print('filename loading', fn)
         xs = pd.read_json(fn)
-        print(xs.keys())
+        # print(xs.keys())
 
+        # xs['uuid'] = uuid
+        xs['plot'] = True
+        xs['legend'] = uuid
+        # xs['legend'] = '_'.join([
+        #     mass_number,
+        #     atomic_symbol,
+        #     reaction_description,
+        #     library]
+        # )
+        downloaded_xs_data[uuid] = xs
 
-        downloaded_xs_data[entry] = xs
-    
     all_x_y_data = []
     for k, v in downloaded_xs_data.items():
 
-        # print('entry', entry)
-        all_x_y_data.append({"y": downloaded_xs_data[k]["cross section"],
-                             "x": downloaded_xs_data[k]['energy'],
-                             "type": "scatter",
-                        # "marker": {"color": colors},
-                             })
-    
+        # print("downloaded_xs_data[k]['plot']", downloaded_xs_data[k]['plot'].array[0])
+        # print("downloaded_xs_data[k]['plot']", type(downloaded_xs_data[k]['plot'].array[0]))
+        if downloaded_xs_data[k]['plot'].array[0] == True:
+            # print('got here')
+            print('        found plot=True', k)
+            # print('uuid is ', downloaded_xs_data[k]['uuid'].array[0])
+            # print('uuid is ', type(downloaded_xs_data[k]['uuid'].array[0]))
+            all_x_y_data.append(
+                {
+                    "y": downloaded_xs_data[k]["cross section"],
+                    "x": downloaded_xs_data[k]['energy'],
+                    "type": "scatter",
+                    "name": downloaded_xs_data[k]['legend']
+                    # "marker": {"color": colors},
+                    }
+                )
+
     return [
         dcc.Graph(
             figure={
                 "data": all_x_y_data,
                 "layout": {
                     "xaxis": {
-                        "title": {"text": 'Energy'}
+                        "title": {"text": 'Energy'},
+                        "type": 'linear'
                     },
                     "yaxis": {
                         "automargin": True,
-                        "title": {"text": 'Cross Section'}
+                        "title": {"text": 'Cross Section'},
+                        "type": 'log'
                     },
                     # "height": 250,
                     # "margin": {"t": 10, "l": 10, "r": 10},
                 },
             },
         )
-        
     ]
 
 if __name__ == '__main__':
