@@ -22,10 +22,10 @@ COPY download_and_convert.py .
 
 RUN python download_and_convert.py
 
-COPY dash_gui.py .
+COPY app.py .
 
-ENV PORT 8050
+ENV PORT 8080
 
-EXPOSE 8050
+EXPOSE 8080
 
-CMD [ "python" , "./dash_gui.py"]
+CMD [ "python" , "./app.py"]
