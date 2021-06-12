@@ -12,7 +12,7 @@ import json
 
 f = open('TENDL-2019_json/TENDL-2019_index.json')
 data = json.load(f)
-print('number of entries', len(data))
+# print('number of entries', len(data))
 df = pd.json_normalize(data)
 
 # df = pd.read_json('TENDL-2019_json/TENDL-2019_index.json')
@@ -102,10 +102,10 @@ def update_graphs(rows, selected_rows):
 
     # dff = df if rows is None else pd.DataFrame(rows)
     global downloaded_xs_data
-    print('selected_rows', selected_rows)
+    # print('selected_rows', selected_rows)
 
     if len(downloaded_xs_data) > 0:
-        print('setting all to plot=False')
+        # print('setting all to plot=False')
         for entry in selected_rows:
     #     # for entry in range(0 , 15):
     #         row = df.iloc[[entry]]
@@ -116,7 +116,7 @@ def update_graphs(rows, selected_rows):
     for entry in selected_rows:
         row = df.iloc[[entry]]
         # print('    ', row)
-        print('    adding ', entry)
+        # print('    adding ', entry)
 
 
         uuid = get_uuid_from_row(row)
@@ -140,7 +140,7 @@ def update_graphs(rows, selected_rows):
 
     all_x_y_data = []
     for k, v in downloaded_xs_data.items():
-        print('    plotting ', k)
+        # print('    plotting ', k)
         # print("downloaded_xs_data[k]['plot']", downloaded_xs_data[k]['plot'].array[0])
         # print("downloaded_xs_data[k]['plot']", type(downloaded_xs_data[k]['plot'].array[0]))
         # if downloaded_xs_data[k]['plot'].array[0] == True:
@@ -181,4 +181,4 @@ def update_graphs(rows, selected_rows):
     ]
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8080)
