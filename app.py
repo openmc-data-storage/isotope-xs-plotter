@@ -22,6 +22,10 @@ downloaded_xs_data={}
 
 app = dash.Dash(__name__)
 
+# added to allow Gunicorn access to Dash Flask as discussed here
+# https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
+server = app.server
+
 app.layout = html.Div([
     dash_table.DataTable(
         id='datatable-interactivity',
@@ -180,5 +184,7 @@ def update_graphs(rows, selected_rows):
         )
     ]
 
+
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8080)
+    # app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
