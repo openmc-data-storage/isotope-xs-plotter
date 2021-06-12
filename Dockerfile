@@ -1,5 +1,12 @@
 
-# docker build -t xsplot .
+# build with
+# sudo docker build -t xsplot .
+
+# run with
+# sudo docker run --network host -t xsplot
+
+# maintained at https://github.com/openmc-data-storage/xsplot.com/
+
 
 FROM continuumio/miniconda3:4.9.2 as dependencies
 
@@ -11,24 +18,14 @@ RUN pip install openmc_data_downloader
 
 RUN pip install openmc_data_to_json
 
-
-
-
-COPY dash_gui.py .
-
 COPY download_and_convert.py .
 
 RUN python download_and_convert.py
 
-# make index file for example cross sections
+COPY dash_gui.py .
 
-# mount json files
-
-# build second stage docker image and del the first
-
-# make streamlit / dash gui that loads the json files and makes 
-
-#this sets the port, gcr looks for this varible
 ENV PORT 8050
 
-CMD python dash_gui.py
+EXPOSE 8050
+
+CMD [ "python" , "./dash_gui.py"]
