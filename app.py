@@ -28,6 +28,8 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
+    html.H1('XSPlot - Nuclear interaction cross section plotter'),
+    html.H3('Filter and search for cross sections to get started'),
     dash_table.DataTable(
         id='datatable-interactivity',
         columns=[
@@ -44,8 +46,8 @@ app.layout = html.Div([
         selected_columns=[],
         selected_rows=[],
         page_action="native",
-        page_current= 0,
-        page_size= 15,
+        page_current=0,
+        page_size=15,
     ),
     html.Div(
         id='datatable-interactivity-container'
@@ -193,8 +195,12 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
 
     # print('xaxis_scale', xaxis_scale)
     # print('yaxis_scale', yaxis_scale)
+    if len(selected_rows) == 0:
+        return html.H1('Select cross sections in the table above to start plotting')
     return [
         dcc.Graph(
+            # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
+            config=dict(showSendToCloud=True),
             figure={
                 "data": all_x_y_data,
                 "layout": {
