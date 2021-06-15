@@ -1,5 +1,6 @@
 import dash
 from dash.dependencies import Input, Output
+from dash_html_components.Label import Label
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -27,6 +28,8 @@ app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div([
+    html.H1('XSPlot - Nuclear interaction cross section plotter'),
+    html.H3('Filter and search for cross sections to get started'),
     dash_table.DataTable(
         id='datatable-interactivity',
         columns=[
@@ -43,11 +46,34 @@ app.layout = html.Div([
         selected_columns=[],
         selected_rows=[],
         page_action="native",
-        page_current= 0,
-        page_size= 15,
+        page_current=0,
+        page_size=15,
     ),
-    html.Div(id='datatable-interactivity-container')
-])
+    html.Div(
+        id='datatable-interactivity-container'
+    ),
+    html.Title('xsplot.com nuclear cross section plotting'),
+    html.H5('X axis scale'),
+    dcc.RadioItems(
+        options=[
+            {'label': 'log', 'value': 'log'},
+            {'label': 'linear', 'value': 'linear'}
+        ],
+        value='log',
+        id='xaxis_scale',
+        labelStyle={'display': 'inline-block'},
+        ),
+    html.H5('Y axis scale'),
+    dcc.RadioItems(
+        options=[
+            {'label': 'log', 'value': 'log'},
+            {'label': 'linear', 'value': 'linear'}
+        ],
+        value='log',
+        id='yaxis_scale',
+        labelStyle={'display': 'inline-block'},
+        )
+    ])
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -89,9 +115,13 @@ def get_uuid_from_row(row):
 
 @app.callback(
     Output('datatable-interactivity-container', "children"),
-    [Input('datatable-interactivity', "derived_virtual_data"),
-     Input('datatable-interactivity', "selected_rows")])
-def update_graphs(rows, selected_rows):
+    [
+    #  Input('datatable-interactivity', "derived_virtual_data"),
+     Input('datatable-interactivity', "selected_rows"),
+     Input('xaxis_scale', 'value'),
+     Input('yaxis_scale', 'value')
+     ])
+def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -163,19 +193,25 @@ def update_graphs(rows, selected_rows):
                     }
                 )
 
+    # print('xaxis_scale', xaxis_scale)
+    # print('yaxis_scale', yaxis_scale)
+    if len(selected_rows) == 0:
+        return html.H1('Select cross sections in the table above to start plotting')
     return [
         dcc.Graph(
+            # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
+            config=dict(showSendToCloud=True),
             figure={
                 "data": all_x_y_data,
                 "layout": {
                     "xaxis": {
                         "title": {"text": 'Energy'},
-                        "type": 'linear'
+                        "type": xaxis_scale
                     },
                     "yaxis": {
                         "automargin": True,
                         "title": {"text": 'Cross Section'},
-                        "type": 'log'
+                        "type": yaxis_scale
                     },
                     # "height": 250,
                     # "margin": {"t": 10, "l": 10, "r": 10},
