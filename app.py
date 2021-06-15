@@ -46,8 +46,20 @@ app.layout = html.Div([
         page_current= 0,
         page_size= 15,
     ),
-    html.Div(id='datatable-interactivity-container')
-])
+    html.Div(
+        id='datatable-interactivity-container'
+    ),
+    html.Title('xsplot.com nuclear cross section plotting'),
+    html.H5('X axis scale'),
+    dcc.RadioItems(
+        options=[
+            {'label': 'log', 'value': 'log'},
+            {'label': 'linear', 'value': 'linear'}
+        ],
+        value='log',
+        id='xaxis_scale'
+        )
+    ])
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -89,9 +101,12 @@ def get_uuid_from_row(row):
 
 @app.callback(
     Output('datatable-interactivity-container', "children"),
-    [Input('datatable-interactivity', "derived_virtual_data"),
-     Input('datatable-interactivity', "selected_rows")])
-def update_graphs(rows, selected_rows):
+    [
+     Input('datatable-interactivity', "derived_virtual_data"),
+     Input('datatable-interactivity', "selected_rows"),
+     Input ('xaxis_scale', 'value')
+     ])
+def update_graphs(rows, selected_rows, xaxis_scale):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -163,6 +178,7 @@ def update_graphs(rows, selected_rows):
                     }
                 )
 
+    print('xaxis_scale', xaxis_scale)
     return [
         dcc.Graph(
             figure={
@@ -170,7 +186,7 @@ def update_graphs(rows, selected_rows):
                 "layout": {
                     "xaxis": {
                         "title": {"text": 'Energy'},
-                        "type": 'linear'
+                        "type": xaxis_scale
                     },
                     "yaxis": {
                         "automargin": True,
