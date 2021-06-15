@@ -1,5 +1,6 @@
 import dash
 from dash.dependencies import Input, Output
+from dash_html_components.Label import Label
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
@@ -57,7 +58,18 @@ app.layout = html.Div([
             {'label': 'linear', 'value': 'linear'}
         ],
         value='log',
-        id='xaxis_scale'
+        id='xaxis_scale',
+        labelStyle={'display': 'inline-block'},
+        ),
+    html.H5('Y axis scale'),
+    dcc.RadioItems(
+        options=[
+            {'label': 'log', 'value': 'log'},
+            {'label': 'linear', 'value': 'linear'}
+        ],
+        value='log',
+        id='yaxis_scale',
+        labelStyle={'display': 'inline-block'},
         )
     ])
 
@@ -102,11 +114,12 @@ def get_uuid_from_row(row):
 @app.callback(
     Output('datatable-interactivity-container', "children"),
     [
-     Input('datatable-interactivity', "derived_virtual_data"),
+    #  Input('datatable-interactivity', "derived_virtual_data"),
      Input('datatable-interactivity', "selected_rows"),
-     Input ('xaxis_scale', 'value')
+     Input('xaxis_scale', 'value'),
+     Input('yaxis_scale', 'value')
      ])
-def update_graphs(rows, selected_rows, xaxis_scale):
+def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -178,7 +191,8 @@ def update_graphs(rows, selected_rows, xaxis_scale):
                     }
                 )
 
-    print('xaxis_scale', xaxis_scale)
+    # print('xaxis_scale', xaxis_scale)
+    # print('yaxis_scale', yaxis_scale)
     return [
         dcc.Graph(
             figure={
@@ -191,7 +205,7 @@ def update_graphs(rows, selected_rows, xaxis_scale):
                     "yaxis": {
                         "automargin": True,
                         "title": {"text": 'Cross Section'},
-                        "type": 'log'
+                        "type": yaxis_scale
                     },
                     # "height": 250,
                     # "margin": {"t": 10, "l": 10, "r": 10},
