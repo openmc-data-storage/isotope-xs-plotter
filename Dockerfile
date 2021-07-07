@@ -7,7 +7,7 @@
 
 # maintained at https://github.com/openmc-data-storage/xsplot.com/
 
-FROM shimwell/nuclear_data_base_docker
+FROM ghcr.io/openmc-data-storage/nuclear_data_base_docker
 
 # the base image nuclear_data_base_docker is based on continuumio/miniconda3:4.9.2
 
