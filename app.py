@@ -30,6 +30,8 @@ server = app.server
 app.layout = html.Div([
     html.H1('XSPlot - Nuclear interaction cross section plotter'),
     html.H3('Filter and search for cross sections to get started'),
+    html.H2('Hint! When filtering in numeric columns use operators. For example =3', style={'color': 'red'}),
+
     dash_table.DataTable(
         id='datatable-interactivity',
         columns=[
@@ -86,22 +88,22 @@ def update_styles(selected_columns):
     } for i in selected_columns]
 
 def get_uuid_from_row(row):
-    atomic_symbol = str(row['Proton number / element']).split()[2]
-    mass_number = str(int(row['Mass number']))
-    library = row['Library'].to_string().split()[1] # not sure why the split is needed
+    atomic_symbol = row['Atomic symbol'].to_string(index=False)
+    # print('atomic_symbol', atomic_symbol)
+    mass_number = row['Mass number'].to_string(index=False)
+    # print('mass_number', mass_number)
+    library = row['Library'].to_string(index=False)
+    # print('library', library)
     incident_particle_symbol = 'n'
-    reaction = row['MT number / reaction products'].to_string().split()[1]
-    reaction_description = row['MT number / reaction products'].to_string().split()[0]
+    # print('incident_particle_symbol', incident_particle_symbol)
+    reaction = row['MT reaction number'].to_string(index=False)
+    # print('reaction', reaction)
+    reaction_description = row['Reaction products'].to_string(index=False)
     
     if library == 'TENDL-2019':
         temperature = '294K'
     else:
         temperature = '300K' # FENDL 3.1d
-
-    # print('atomic_symbol',atomic_symbol)
-    # print('mass_number',mass_number)
-    # print('library',library)
-    # print('reaction',reaction)
 
     uuid = '_'.join([
         atomic_symbol,
@@ -157,7 +159,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
         library = row['Library'].to_string().split()[1]
 
         fn = library+'_json/'+uuid+'.json'
-        # print('filename loading', fn)
+        print('filename loading', fn)
         xs = pd.read_json(fn)
         # print(xs.keys())
 
