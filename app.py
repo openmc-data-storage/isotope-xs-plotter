@@ -6,10 +6,11 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import json
+# import time
 
-
-h5File = "all_indexes.h5"
-df = pd.read_hdf(h5File, "/data/d1")
+# start = time.process_time()
+df = pd.read_hdf("all_indexes.h5", "/data/d1")
+# print('time to read index', time.process_time() - start)
 
 downloaded_xs_data={}
 
@@ -143,27 +144,23 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
 
     for entry in selected_rows:
         row = df.iloc[[entry]]
-        # print('    ', row)
-        # print('    adding ', entry)
-
 
         uuid = get_uuid_from_row(row)
         library = row['Library'].to_string().split()[1]
 
         fn = library+'_json/'+uuid+'.json'
-        print('filename loading', fn)
-        xs = pd.read_json(fn)
-        # print(xs.keys())
+        # print('filename loading', fn)
+        with open(fn) as json_file:
+            xs = json.load(json_file)
 
-        # xs['uuid'] = uuid
         xs['plot'] = True
-        xs['legend'] = uuid
-        # xs['legend'] = '_'.join([
-        #     mass_number,
-        #     atomic_symbol,
-        #     reaction_description,
-        #     library]
-        # )
+        xs['legend'] = '{}{} (n,{}) {}'.format(
+            xs['Atomic symbol'],
+            xs['Mass number'],
+            xs['Reaction products'],
+            xs['Library'],
+        )
+        
         downloaded_xs_data[entry] = xs
 
     all_x_y_data = []
@@ -177,6 +174,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
         # print('uuid is ', downloaded_xs_data[k]['uuid'].array[0])
         # print('uuid is ', type(downloaded_xs_data[k]['uuid'].array[0]))
         if k in selected_rows:
+            print(downloaded_xs_data[k]['legend'])
             all_x_y_data.append(
                 {
                     "y": downloaded_xs_data[k]["cross section"],
@@ -207,6 +205,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
                         "title": {"text": 'Cross Section'},
                         "type": yaxis_scale
                     },
+                    "showlegend": True
                     # "height": 250,
                     # "margin": {"t": 10, "l": 10, "r": 10},
                 },
