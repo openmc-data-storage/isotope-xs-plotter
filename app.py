@@ -1,3 +1,5 @@
+from os import link
+from typing import Text
 import dash
 from dash.dependencies import Input, Output
 from dash_html_components.Label import Label
@@ -16,13 +18,25 @@ downloaded_xs_data={}
 
 app = dash.Dash(__name__)
 
+
 # added to allow Gunicorn access to Dash Flask as discussed here
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
 server = app.server
 
 app.layout = html.Div([
+    # guide on plotly html https://dash.plotly.com/dash-html-components
     html.H1('XSPlot - Nuclear interaction cross section plotter'),
     html.H3('Filter and search for cross sections to get started'),
+    html.Iframe(
+        src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
+        width="170",
+        height="30",
+        title="GitHub",
+        style={'border':0, 'scrolling':"0"}
+    ),
+    # html.Text("Contribute, raise feature requests or report issues"),
+    # html.A("here", href='https://github.com/openmc-data-storage/xsplot.com', target="_blank"),
+    # dcc.Link('Contribute, raise feature requests or report issues here', href=''),
     html.H2('Hint! When filtering in numeric columns use operators. For example =3', style={'color': 'red'}),
 
     dash_table.DataTable(
