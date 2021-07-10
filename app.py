@@ -16,7 +16,7 @@ df = pd.read_hdf("all_indexes.h5", "/data/d1")
 
 downloaded_xs_data={}
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, prevent_initial_callbacks=True)
 app.title = 'XSPlot'
 
 # added to allow Gunicorn access to Dash Flask as discussed here
@@ -25,7 +25,12 @@ server = app.server
 
 app.layout = html.Div([
     # guide on plotly html https://dash.plotly.com/dash-html-components
-    html.H1('XSPlot - Nuclear interaction cross section plotter'),
+    html.H1(
+        'XSPlot - Nuclear interaction cross section plotter',
+        # style={'font-family': 'Times New Roman, Times, serif'},
+        # style={'font-family': 'Georgia, serif'},
+        # style={'fontColor': 'blue'}
+        ),
     html.H3('Filter and search for cross sections to get started'),
     html.Iframe(
         src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
@@ -37,9 +42,13 @@ app.layout = html.Div([
     # html.Text("Contribute, raise feature requests or report issues"),
     # html.A("here", href='https://github.com/openmc-data-storage/xsplot.com', target="_blank"),
     # dcc.Link('Contribute, raise feature requests or report issues here', href=''),
-    html.H2('Hint! When filtering in numeric columns use operators. For example =3', style={'color': 'red'}),
+    html.H2(
+        'Hint! When filtering in numeric columns use operators. For example =3',
+        style={'color': 'red'}
+    ),
 
     dash_table.DataTable(
+        # style_cell={'fontSize':20, 'font-family':'sans-serif'}
         id='datatable-interactivity',
         columns=[
             {"name": i, "id": i, "selectable": True} for i in df.columns
@@ -81,8 +90,12 @@ app.layout = html.Div([
         value='log',
         id='yaxis_scale',
         labelStyle={'display': 'inline-block'},
-        )
+        ),
+    html.Button("Download Plotted Data", id="btn_txt"),
+    dcc.Download(id="download-text-index")
     ])
+    # RangeSlider for energy units
+    # Download
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -227,6 +240,24 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
         )
     ]
 
+
+# could work with tigger detection
+# @app.callback(Output("download-text-index", "data"), [Input("btn_txt", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
+# def func(n_clicks, selected_rows):
+    # trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+
+@app.callback(Output("download-text-index", "data"), Input("btn_txt", "n_clicks"))
+def func(n_clicks):
+
+    global downloaded_xs_data
+
+    if n_clicks is None:
+        raise dash.exceptions.PreventUpdate
+    else:
+        if len(downloaded_xs_data>0):
+            return dict(
+                content=json.dumps(downloaded_xs_data, indent=2),
+                filename="xsplot_download.json")
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8080)
