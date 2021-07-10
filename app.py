@@ -7,18 +7,10 @@ import dash_html_components as html
 import pandas as pd
 import json
 
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
-# df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/solar.csv')
+h5File = "all_indexes.h5"
+df = pd.read_hdf(h5File, "/data/d1")
 
-f = open('TENDL-2019_json/TENDL-2019_index.json')
-data = json.load(f)
-# print('number of entries', len(data))
-df = pd.json_normalize(data)
-
-# df = pd.read_json('TENDL-2019_json/TENDL-2019_index.json')
-
-# print(df)
 downloaded_xs_data={}
 
 app = dash.Dash(__name__)
