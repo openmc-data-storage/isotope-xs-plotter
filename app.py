@@ -17,7 +17,7 @@ df = pd.read_hdf("all_indexes.h5", "/data/d1")
 downloaded_xs_data={}
 
 app = dash.Dash(__name__)
-
+app.title = 'XSPlot'
 
 # added to allow Gunicorn access to Dash Flask as discussed here
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
