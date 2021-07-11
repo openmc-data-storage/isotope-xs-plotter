@@ -15,6 +15,7 @@ RUN pip install dash
 
 RUN pip install gunicorn==20.0.4
 
+COPY assets assets
 COPY app.py .
 
 ENV PORT 8080

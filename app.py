@@ -1,3 +1,5 @@
+from os import link
+from typing import Text
 import dash
 from dash.dependencies import Input, Output
 from dash_html_components.Label import Label
@@ -14,28 +16,46 @@ df = pd.read_hdf("all_indexes.h5", "/data/d1")
 
 downloaded_xs_data={}
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, prevent_initial_callbacks=True)
+app.title = 'XSPlot'
+app.description = 'Online neutron interaction corss section plotter'
 
 # added to allow Gunicorn access to Dash Flask as discussed here
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
 server = app.server
 
-app.layout = html.Div([
-    html.H1('XSPlot - Nuclear interaction cross section plotter'),
+components = [
+    # guide on plotly html https://dash.plotly.com/dash-html-components
+    html.H1(
+        'XSPlot - Neutron cross section plotter',
+        # TODO find a nicer font
+        # style={'font-family': 'Times New Roman, Times, serif'},
+        # style={'font-family': 'Georgia, serif'},
+        # style={'fontColor': 'blue'}
+        ),
     html.H3('Filter and search for cross sections to get started'),
-    html.H2('Hint! When filtering in numeric columns use operators. For example =3', style={'color': 'red'}),
-
+    html.H3(
+        'Hint! Column filtering uses "contains" logic. For equals try using equals operator. For example =42',
+        style={'color': 'red'}
+    ),
+    html.Iframe(
+        src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
+        width="170",
+        height="30",
+        title="GitHub",
+        style={'border':0, 'scrolling':"0"}
+    ),
     dash_table.DataTable(
+        # style_cell={'fontSize':20, 'font-family':'sans-serif'}
         id='datatable-interactivity',
         columns=[
-            {"name": i, "id": i, "selectable": True} for i in df.columns
+            {"name": i, "id": i, "selectable": True} for i in df.columns if i not in ['Temperature(K)', 'Incident particle']
         ],
         data=df.to_dict('records'),
         editable=False,
-        filter_action="native",
+        filter_action="native", # TODO change to equals instead of contains
         sort_action="native",
         sort_mode="multi",
-        # column_selectable="single",
         row_selectable="multi",
         row_deletable=False,
         selected_columns=[],
@@ -58,6 +78,11 @@ app.layout = html.Div([
         id='xaxis_scale',
         labelStyle={'display': 'inline-block'},
         ),
+    # TODO move to table
+    # https://dash.plotly.com/dash-html-components/td
+    # https://dash.plotly.com/dash-html-components/tr
+    # https://dash.plotly.com/dash-html-components/table
+    # https://stackoverflow.com/questions/52213738/html-dash-table
     html.H5('Y axis scale'),
     dcc.RadioItems(
         options=[
@@ -67,8 +92,14 @@ app.layout = html.Div([
         value='log',
         id='yaxis_scale',
         labelStyle={'display': 'inline-block'},
-        )
-    ])
+        ),
+    html.Br(),
+    html.Button("Download Plotted Data", id="btn_txt"),
+    dcc.Download(id="download-text-index")
+    ]
+    # TODO RangeSlider for energy units (Mega, Giga etc)
+
+app.layout = html.Div(components)
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -187,32 +218,50 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
 
     # print('xaxis_scale', xaxis_scale)
     # print('yaxis_scale', yaxis_scale)
-    if len(selected_rows) == 0:
-        return html.H1('Select cross sections in the table above to start plotting')
-    return [
-        dcc.Graph(
-            # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
-            config=dict(showSendToCloud=True),
-            figure={
-                "data": all_x_y_data,
-                "layout": {
-                    "xaxis": {
-                        "title": {"text": 'Energy'},
-                        "type": xaxis_scale
+    if len(selected_rows) != 0:
+        # return html.H1('Select cross sections in the table above to start plotting')
+        return [
+            dcc.Graph(
+                # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
+                config=dict(showSendToCloud=True),
+                figure={
+                    "data": all_x_y_data,
+                    "layout": {
+                        "xaxis": {
+                            "title": {"text": 'Energy'},
+                            "type": xaxis_scale
+                        },
+                        "yaxis": {
+                            "automargin": True,
+                            "title": {"text": 'Cross Section'},
+                            "type": yaxis_scale
+                        },
+                        "showlegend": True
+                        # "height": 250,
+                        # "margin": {"t": 10, "l": 10, "r": 10},
                     },
-                    "yaxis": {
-                        "automargin": True,
-                        "title": {"text": 'Cross Section'},
-                        "type": yaxis_scale
-                    },
-                    "showlegend": True
-                    # "height": 250,
-                    # "margin": {"t": 10, "l": 10, "r": 10},
                 },
-            },
-        )
-    ]
+            )
+        ]
 
+
+# could work with tigger detection
+# @app.callback(Output("download-text-index", "data"), [Input("btn_txt", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
+# def func(n_clicks, selected_rows):
+    # trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+
+@app.callback(Output("download-text-index", "data"), Input("btn_txt", "n_clicks"))
+def func(n_clicks):
+
+    global downloaded_xs_data
+
+    if n_clicks is None:
+        raise dash.exceptions.PreventUpdate
+    else:
+        if len(downloaded_xs_data)>0:
+            return dict(
+                content=json.dumps(downloaded_xs_data, indent=2),
+                filename="xsplot_download.json")
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8080)
