@@ -18,6 +18,7 @@ downloaded_xs_data={}
 
 app = dash.Dash(__name__, prevent_initial_callbacks=True)
 app.title = 'XSPlot'
+app.description = 'Online neutron interaction corss section plotter'
 
 # added to allow Gunicorn access to Dash Flask as discussed here
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
@@ -26,7 +27,7 @@ server = app.server
 components = [
     # guide on plotly html https://dash.plotly.com/dash-html-components
     html.H1(
-        'XSPlot - Nuclear interaction cross section plotter',
+        'XSPlot - Neutron cross section plotter',
         # TODO find a nicer font
         # style={'font-family': 'Times New Roman, Times, serif'},
         # style={'font-family': 'Georgia, serif'},
