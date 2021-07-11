@@ -23,15 +23,20 @@ app.title = 'XSPlot'
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
 server = app.server
 
-app.layout = html.Div([
+components = [
     # guide on plotly html https://dash.plotly.com/dash-html-components
     html.H1(
         'XSPlot - Nuclear interaction cross section plotter',
+        # TODO find a nicer font
         # style={'font-family': 'Times New Roman, Times, serif'},
         # style={'font-family': 'Georgia, serif'},
         # style={'fontColor': 'blue'}
         ),
     html.H3('Filter and search for cross sections to get started'),
+    html.H3(
+        'Hint! Column filtering uses "contains" logic. For equals try using equals operator. For example =42',
+        style={'color': 'red'}
+    ),
     html.Iframe(
         src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
         width="170",
@@ -39,26 +44,17 @@ app.layout = html.Div([
         title="GitHub",
         style={'border':0, 'scrolling':"0"}
     ),
-    # html.Text("Contribute, raise feature requests or report issues"),
-    # html.A("here", href='https://github.com/openmc-data-storage/xsplot.com', target="_blank"),
-    # dcc.Link('Contribute, raise feature requests or report issues here', href=''),
-    html.H2(
-        'Hint! When filtering in numeric columns use operators. For example =3',
-        style={'color': 'red'}
-    ),
-
     dash_table.DataTable(
         # style_cell={'fontSize':20, 'font-family':'sans-serif'}
         id='datatable-interactivity',
         columns=[
-            {"name": i, "id": i, "selectable": True} for i in df.columns
+            {"name": i, "id": i, "selectable": True} for i in df.columns if i not in ['Temperature(K)', 'Incident particle']
         ],
         data=df.to_dict('records'),
         editable=False,
-        filter_action="native",
+        filter_action="native", # TODO change to equals instead of contains
         sort_action="native",
         sort_mode="multi",
-        # column_selectable="single",
         row_selectable="multi",
         row_deletable=False,
         selected_columns=[],
@@ -81,6 +77,11 @@ app.layout = html.Div([
         id='xaxis_scale',
         labelStyle={'display': 'inline-block'},
         ),
+    # TODO move to table
+    # https://dash.plotly.com/dash-html-components/td
+    # https://dash.plotly.com/dash-html-components/tr
+    # https://dash.plotly.com/dash-html-components/table
+    # https://stackoverflow.com/questions/52213738/html-dash-table
     html.H5('Y axis scale'),
     dcc.RadioItems(
         options=[
@@ -91,11 +92,13 @@ app.layout = html.Div([
         id='yaxis_scale',
         labelStyle={'display': 'inline-block'},
         ),
+    html.Br(),
     html.Button("Download Plotted Data", id="btn_txt"),
     dcc.Download(id="download-text-index")
-    ])
-    # RangeSlider for energy units
-    # Download
+    ]
+    # TODO RangeSlider for energy units (Mega, Giga etc)
+
+app.layout = html.Div(components)
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
@@ -214,31 +217,31 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
 
     # print('xaxis_scale', xaxis_scale)
     # print('yaxis_scale', yaxis_scale)
-    if len(selected_rows) == 0:
-        return html.H1('Select cross sections in the table above to start plotting')
-    return [
-        dcc.Graph(
-            # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
-            config=dict(showSendToCloud=True),
-            figure={
-                "data": all_x_y_data,
-                "layout": {
-                    "xaxis": {
-                        "title": {"text": 'Energy'},
-                        "type": xaxis_scale
+    if len(selected_rows) != 0:
+        # return html.H1('Select cross sections in the table above to start plotting')
+        return [
+            dcc.Graph(
+                # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
+                config=dict(showSendToCloud=True),
+                figure={
+                    "data": all_x_y_data,
+                    "layout": {
+                        "xaxis": {
+                            "title": {"text": 'Energy'},
+                            "type": xaxis_scale
+                        },
+                        "yaxis": {
+                            "automargin": True,
+                            "title": {"text": 'Cross Section'},
+                            "type": yaxis_scale
+                        },
+                        "showlegend": True
+                        # "height": 250,
+                        # "margin": {"t": 10, "l": 10, "r": 10},
                     },
-                    "yaxis": {
-                        "automargin": True,
-                        "title": {"text": 'Cross Section'},
-                        "type": yaxis_scale
-                    },
-                    "showlegend": True
-                    # "height": 250,
-                    # "margin": {"t": 10, "l": 10, "r": 10},
                 },
-            },
-        )
-    ]
+            )
+        ]
 
 
 # could work with tigger detection
@@ -254,7 +257,7 @@ def func(n_clicks):
     if n_clicks is None:
         raise dash.exceptions.PreventUpdate
     else:
-        if len(downloaded_xs_data>0):
+        if len(downloaded_xs_data)>0:
             return dict(
                 content=json.dumps(downloaded_xs_data, indent=2),
                 filename="xsplot_download.json")
