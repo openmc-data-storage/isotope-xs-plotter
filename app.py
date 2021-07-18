@@ -16,9 +16,22 @@ df = pd.read_hdf("all_indexes.h5", "/data/d1")
 
 downloaded_xs_data={}
 
-app = dash.Dash(__name__, prevent_initial_callbacks=True)
+
+
+
+
+
+app = dash.Dash(__name__,
+    prevent_initial_callbacks=True,
+    # meta_tags={
+    #     'name': 'Neutron cross section plotting. Range of nuclear data, reactions, energy, atomic numbers from a large database',
+    #     'content': 'My App'
+    # }
+)
 app.title = 'XSPlot'
 app.description = 'Online neutron interaction corss section plotter'
+# TODO add description, current google says Dash in description area
+# https://github.com/plotly/dash/blob/1a40162dfce654b885e475ecb280d3cca9bff0a5/dash/dash.py#L193
 
 # added to allow Gunicorn access to Dash Flask as discussed here
 # https://ldnicolasmay.medium.com/deploying-a-free-dash-open-source-app-from-a-docker-container-with-gunicorn-3f426b5fd5df
@@ -26,6 +39,7 @@ server = app.server
 
 components = [
     # guide on plotly html https://dash.plotly.com/dash-html-components
+    html.Title('xsplot.com nuclear cross section plotting'),
     html.H1(
         'XSPlot - Neutron cross section plotter',
         # TODO find a nicer font
@@ -64,10 +78,11 @@ components = [
         page_current=0,
         page_size=15,
     ),
+    html.Br(),
+    html.Br(),
     html.Div(
         id='datatable-interactivity-container'
     ),
-    html.Title('xsplot.com nuclear cross section plotting'),
     html.H5('X axis scale'),
     dcc.RadioItems(
         options=[
@@ -94,7 +109,8 @@ components = [
         labelStyle={'display': 'inline-block'},
         ),
     html.Br(),
-    html.Button("Download Plotted Data", id="btn_txt"),
+    html.Button("Download Plotted Data", id="btn_download"),
+    html.Button("Download Plotted Data2", id="btn_download2"),
     dcc.Download(id="download-text-index")
     ]
     # TODO RangeSlider for energy units (Mega, Giga etc)
@@ -216,6 +232,9 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
                     }
                 )
 
+    energy_units = '(eV)'
+    xs_units = '(b)'
+
     # print('xaxis_scale', xaxis_scale)
     # print('yaxis_scale', yaxis_scale)
     if len(selected_rows) != 0:
@@ -227,13 +246,14 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
                 figure={
                     "data": all_x_y_data,
                     "layout": {
+                        "margin":{"l":3, "r":2, "t":15, "b":40},
                         "xaxis": {
-                            "title": {"text": 'Energy'},
+                            "title": {"text": 'Energy {}'.format(energy_units)},
                             "type": xaxis_scale
                         },
                         "yaxis": {
                             "automargin": True,
-                            "title": {"text": 'Cross Section'},
+                            "title": {"text": 'Cross Section {}'.format(xs_units)},
                             "type": yaxis_scale
                         },
                         "showlegend": True
@@ -244,24 +264,57 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
             )
         ]
 
+# uses a trigger to identify the callback and if the button is used then jsonifys the selected data
+@app.callback(Output("download-text-index", "data"), [Input("btn_download2", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
+def func2(n_clicks, selected_rows):
+    trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    print('trigger_id', trigger_id)
+    global downloaded_xs_data
+
+    if trigger_id == "btn_download2":
+        if n_clicks is None:
+            raise dash.exceptions.PreventUpdate
+        else:
+            if len(downloaded_xs_data)>0:
+
+                all_x_y_data = []
+                for k, v in downloaded_xs_data.items():
+                    if k in selected_rows:
+                        print(downloaded_xs_data[k]['legend'])
+                        all_x_y_data.append(downloaded_xs_data[k])
+
+                return dict(
+                    content=json.dumps(all_x_y_data, indent=2),
+                    filename="xsplot_download.json") 
+
 
 # could work with tigger detection
 # @app.callback(Output("download-text-index", "data"), [Input("btn_txt", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
 # def func(n_clicks, selected_rows):
     # trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
 
-@app.callback(Output("download-text-index", "data"), Input("btn_txt", "n_clicks"))
-def func(n_clicks):
+# @app.callback(Output("download-text-index", "data"), Input("btn_download", "n_clicks"))
+# def func(n_clicks):
 
-    global downloaded_xs_data
+#     global downloaded_xs_data
 
-    if n_clicks is None:
-        raise dash.exceptions.PreventUpdate
-    else:
-        if len(downloaded_xs_data)>0:
-            return dict(
-                content=json.dumps(downloaded_xs_data, indent=2),
-                filename="xsplot_download.json")
+#     if n_clicks is None:
+#         raise dash.exceptions.PreventUpdate
+#     else:
+#         if len(downloaded_xs_data)>0:
+#             return dict(
+#                 content=json.dumps(downloaded_xs_data, indent=2),
+#                 filename="xsplot_download.json")
+
+# plot appears to allways be True, so this download doesn't work
+            # selected= []
+            # for entry in downloaded_xs_data:
+            #     print('entry', entry)
+            #     # input()
+            #     if downloaded_xs_data[entry]['plot']== True:
+            #         selected.append(downloaded_xs_data[entry])
+            # return dict(
+            #     content=json.dumps(selected, indent=2),
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8080)
