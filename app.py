@@ -109,8 +109,8 @@ components = [
         labelStyle={'display': 'inline-block'},
         ),
     html.Br(),
-    html.Button("Download Plotted Data", id="btn_download"),
-    html.Button("Download Plotted Data2", id="btn_download2"),
+    # html.Button("Download Plotted Data", id="btn_download"),
+    html.Button("Download Plotted Data", id="btn_download2"),
     dcc.Download(id="download-text-index")
     ]
     # TODO RangeSlider for energy units (Mega, Giga etc)
