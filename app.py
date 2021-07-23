@@ -78,6 +78,7 @@ components = [
         page_current=0,
         page_size=15,
     ),
+    html.Button("clear selection", title='Clear all selected data. You can also temporarily hide plots by clicked them in the legend' id="clear"),
     html.Br(),
     html.Br(),
     html.Div(
@@ -109,13 +110,19 @@ components = [
         labelStyle={'display': 'inline-block'},
         ),
     html.Br(),
-    # html.Button("Download Plotted Data", id="btn_download"),
     html.Button("Download Plotted Data", id="btn_download2"),
     dcc.Download(id="download-text-index")
     ]
     # TODO RangeSlider for energy units (Mega, Giga etc)
 
 app.layout = html.Div(components)
+
+@app.callback(
+    Output("datatable-interactivity", "selected_rows"),
+    Input("clear", "n_clicks"),
+)
+def clear(n_clicks):
+    return []
 
 @app.callback(
     Output('datatable-interactivity', 'style_data_conditional'),
