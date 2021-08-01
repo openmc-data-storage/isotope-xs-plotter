@@ -6,19 +6,12 @@ from dash_html_components.Label import Label
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
+from pandas import read_hdf
 import json
-# import time
 
-# start = time.process_time()
-df = pd.read_hdf("all_indexes.h5", "/data/d1")
-# print('time to read index', time.process_time() - start)
+df = read_hdf("all_indexes.h5", "/data/d1")
 
 downloaded_xs_data={}
-
-
-
-
 
 
 app = dash.Dash(__name__,
@@ -29,7 +22,7 @@ app = dash.Dash(__name__,
     # }
 )
 app.title = 'XSPlot'
-app.description = 'Online neutron interaction corss section plotter'
+app.description = 'Online neutron interaction cross section plotter for nuclear reactions'
 # TODO add description, current google says Dash in description area
 # https://github.com/plotly/dash/blob/1a40162dfce654b885e475ecb280d3cca9bff0a5/dash/dash.py#L193
 
@@ -49,7 +42,7 @@ components = [
         ),
     html.H3('Filter and search for cross sections to get started'),
     html.H3(
-        'Hint! Column filtering uses "contains" logic. For equals try using equals operator. For example =42',
+        'Hint! Column filtering uses "contains" logic. Filtering with  > < = are also supported. For example =56 would find entries equal to 56',
         style={'color': 'red'}
     ),
     html.Iframe(
@@ -94,7 +87,7 @@ components = [
         id='xaxis_scale',
         labelStyle={'display': 'inline-block'},
         ),
-    # TODO move to table
+    # TODO move components to a table layout
     # https://dash.plotly.com/dash-html-components/td
     # https://dash.plotly.com/dash-html-components/tr
     # https://dash.plotly.com/dash-html-components/table
@@ -109,11 +102,21 @@ components = [
         id='yaxis_scale',
         labelStyle={'display': 'inline-block'},
         ),
+    html.H5('X axis units'),
+    dcc.Slider(
+        min=0,
+        max=4,
+        marks={i: f'{s}' for i, s in enumerate([
+            'μeV', 'eV', 'keV', 'MeV', 'GeV'
+        ])},
+        value=1,
+        id='x_axis_units'
+    ),
     html.Br(),
     html.Button("Download Plotted Data", title='Download a text file of the data in JSON format', id="btn_download2"),
     dcc.Download(id="download-text-index")
     ]
-    # TODO RangeSlider for energy units (Mega, Giga etc)
+
 
 app.layout = html.Div(components)
 
@@ -136,15 +139,10 @@ def update_styles(selected_columns):
 
 def get_uuid_from_row(row):
     atomic_symbol = row['Atomic symbol'].to_string(index=False)
-    # print('atomic_symbol', atomic_symbol)
     mass_number = row['Mass number'].to_string(index=False)
-    # print('mass_number', mass_number)
     library = row['Library'].to_string(index=False)
-    # print('library', library)
     incident_particle_symbol = 'n'
-    # print('incident_particle_symbol', incident_particle_symbol)
     reaction = row['MT reaction number'].to_string(index=False)
-    # print('reaction', reaction)
     reaction_description = row['Reaction products'].to_string(index=False)
     
     if library == 'TENDL-2019':
@@ -165,12 +163,17 @@ def get_uuid_from_row(row):
 @app.callback(
     Output('datatable-interactivity-container', "children"),
     [
-    #  Input('datatable-interactivity', "derived_virtual_data"),
      Input('datatable-interactivity', "selected_rows"),
      Input('xaxis_scale', 'value'),
-     Input('yaxis_scale', 'value')
+     Input('yaxis_scale', 'value'),
+     Input('x_axis_units', 'value')
      ])
-def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
+def update_graphs(
+    selected_rows,
+    xaxis_scale,
+    yaxis_scale,
+    x_axis_units
+):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -183,16 +186,10 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
     if selected_rows is None:
         selected_rows = []
 
-    # dff = df if rows is None else pd.DataFrame(rows)
     global downloaded_xs_data
-    # print('selected_rows', selected_rows)
 
     if len(downloaded_xs_data) > 0:
-        # print('setting all to plot=False')
         for entry in selected_rows:
-    #     # for entry in range(0 , 15):
-    #         row = df.iloc[[entry]]
-    #         uuid = get_uuid_from_row(row)
             if entry in downloaded_xs_data.keys():
                 downloaded_xs_data[entry]['plot'] = False
 
@@ -218,50 +215,64 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
         downloaded_xs_data[entry] = xs
 
     all_x_y_data = []
+
+    x_axis_units_multiplier = {
+        0:-3,
+        1:0,
+        2:3,
+        3:6,
+        4:9
+    }
     for k, v in downloaded_xs_data.items():
-        # print('    plotting ', k)
-        # print("downloaded_xs_data[k]['plot']", downloaded_xs_data[k]['plot'].array[0])
-        # print("downloaded_xs_data[k]['plot']", type(downloaded_xs_data[k]['plot'].array[0]))
-        # if downloaded_xs_data[k]['plot'].array[0] == True:
-            # print('got here')
-        # print('        found plot=True', k)
-        # print('uuid is ', downloaded_xs_data[k]['uuid'].array[0])
-        # print('uuid is ', type(downloaded_xs_data[k]['uuid'].array[0]))
+        import math
         if k in selected_rows:
-            print(downloaded_xs_data[k]['legend'])
+            
+            multiplier = math.pow(10, -1*x_axis_units_multiplier[x_axis_units])
+            energy= [ x*multiplier for x in downloaded_xs_data[k]['energy'] ]
+
             all_x_y_data.append(
                 {
                     "y": downloaded_xs_data[k]["cross section"],
-                    "x": downloaded_xs_data[k]['energy'],
+                    "x": energy,
                     "type": "scatter",
                     "name": downloaded_xs_data[k]['legend']
                     # "marker": {"color": colors},
                     }
                 )
 
-    energy_units = '(eV)'
+    # previous website had more complex unit logic
+    # https://github.com/Shimwell/database_GUI/blob/d670ca88feef8f41a0f20abd30bdb2a82cbab6bd/src/App.js#L305-L329
+    x_axis_units_text = {
+        0:'μeV',
+        1:'eV',
+        2:'keV',
+        3:'MeV',
+        4:'GeV'
+    }
+
+    energy_units = f'({x_axis_units_text[x_axis_units]})'
     xs_units = '(b)'
 
-    # print('xaxis_scale', xaxis_scale)
-    # print('yaxis_scale', yaxis_scale)
     if len(selected_rows) != 0:
         # return html.H1('Select cross sections in the table above to start plotting')
         return [
             dcc.Graph(
-                # config=dict(modeBarButtonsToAdd=['sendDataToCloud']),
                 config=dict(showSendToCloud=True),
                 figure={
                     "data": all_x_y_data,
                     "layout": {
-                        "margin":{"l":3, "r":2, "t":15, "b":40},
+                        "margin":{"l":3, "r":2, "t":15, "b":60},
                         "xaxis": {
-                            "title": {"text": 'Energy {}'.format(energy_units)},
-                            "type": xaxis_scale
+                            "title": {"text": f'Energy {energy_units}'},
+                            "type": xaxis_scale,
+                            "tickformat": '.1e',
+                            "tickangle":45
                         },
                         "yaxis": {
                             "automargin": True,
-                            "title": {"text": 'Cross Section {}'.format(xs_units)},
-                            "type": yaxis_scale
+                            "title": {"text": f'Cross Section {xs_units}'},
+                            "type": yaxis_scale,
+                            "tickformat": '.1e'
                         },
                         "showlegend": True
                         # "height": 250,
@@ -275,7 +286,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale):
 @app.callback(Output("download-text-index", "data"), [Input("btn_download2", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
 def func2(n_clicks, selected_rows):
     trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
-    print('trigger_id', trigger_id)
+
     global downloaded_xs_data
 
     if trigger_id == "btn_download2":
@@ -295,34 +306,5 @@ def func2(n_clicks, selected_rows):
                     filename="xsplot_download.json") 
 
 
-# could work with tigger detection
-# @app.callback(Output("download-text-index", "data"), [Input("btn_txt", "n_clicks"), Input('datatable-interactivity', "selected_rows")])
-# def func(n_clicks, selected_rows):
-    # trigger_id = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
-
-# @app.callback(Output("download-text-index", "data"), Input("btn_download", "n_clicks"))
-# def func(n_clicks):
-
-#     global downloaded_xs_data
-
-#     if n_clicks is None:
-#         raise dash.exceptions.PreventUpdate
-#     else:
-#         if len(downloaded_xs_data)>0:
-#             return dict(
-#                 content=json.dumps(downloaded_xs_data, indent=2),
-#                 filename="xsplot_download.json")
-
-# plot appears to allways be True, so this download doesn't work
-            # selected= []
-            # for entry in downloaded_xs_data:
-            #     print('entry', entry)
-            #     # input()
-            #     if downloaded_xs_data[entry]['plot']== True:
-            #         selected.append(downloaded_xs_data[entry])
-            # return dict(
-            #     content=json.dumps(selected, indent=2),
-
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8080)
-    # app.run_server(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
