@@ -16,13 +16,18 @@ downloaded_xs_data={}
 
 app = dash.Dash(__name__,
     prevent_initial_callbacks=True,
-    # meta_tags={
-    #     'name': 'Neutron cross section plotting. Range of nuclear data, reactions, energy, atomic numbers from a large database',
-    #     'content': 'My App'
-    # }
+    meta_tags=[
+        # A description of the app, used by e.g.
+        # search engines when displaying search results.
+        {
+            'name': 'XSPlot neutron cross section plotter',
+            'content': 'Plot neutron cross sections',
+            'keywords': 'plot neutron nuclear cross section energy barns tendl'
+        }
+    ]
 )
 app.title = 'XSPlot'
-app.description = 'Online neutron interaction cross section plotter for nuclear reactions'
+app.description = 'Plot neutron cross sections. Nuclear data from TENDL library.'
 # TODO add description, current google says Dash in description area
 # https://github.com/plotly/dash/blob/1a40162dfce654b885e475ecb280d3cca9bff0a5/dash/dash.py#L193
 
@@ -40,7 +45,7 @@ components = [
         # style={'font-family': 'Georgia, serif'},
         # style={'fontColor': 'blue'}
         ),
-    html.H3('Filter and search for cross sections to get started'),
+    html.H3('Filter and search for cross sections to start plotting neutron cross sections'),
     html.H3(
         'Hint! Column filtering uses "contains" logic. Filtering with  > < = are also supported. For example =56 would find entries equal to 56',
         style={'color': 'red'}
