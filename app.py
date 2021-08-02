@@ -23,10 +23,28 @@ app = dash.Dash(__name__,
             'name': 'XSPlot neutron cross section plotter',
             'content': 'Plot neutron cross sections',
             'keywords': 'plot neutron nuclear cross section energy barns tendl'
+        },
+        # A tag that tells Internet Explorer (IE)
+        # to use the latest renderer version available
+        # to that browser (e.g. Edge)
+        {
+            'http-equiv': 'X-UA-Compatible',
+            'content': 'IE=edge'
+        },
+        # A tag that tells the browser not to scale
+        # desktop widths to fit mobile screens.
+        # Sets the width of the viewport (browser)
+        # to the width of the device, and the zoom level
+        # (initial scale) to 1.
+        #
+        # Necessary for "true" mobile support.
+        {
+        'name': 'viewport',
+        'content': 'width=device-width, initial-scale=1.0'
         }
     ]
 )
-app.title = 'XSPlot'
+app.title = 'XSPlot neutron cross section plotter'
 app.description = 'Plot neutron cross sections. Nuclear data from TENDL library.'
 # TODO add description, current google says Dash in description area
 # https://github.com/plotly/dash/blob/1a40162dfce654b885e475ecb280d3cca9bff0a5/dash/dash.py#L193
@@ -76,7 +94,17 @@ components = [
         page_current=0,
         page_size=15,
     ),
-    html.Button("clear selection", title='Clear all selected data. You can also temporarily hide plots by clicked them in the legend', id="clear"),
+    html.Table([
+    # html.Div([
+        html.Tr([
+            html.Th(
+                html.Button("clear selection", title='Clear all selected data. You can also temporarily hide plots by clicked them in the legend', id="clear")
+            ),
+            html.Th(
+                html.Button("Download Plotted Data", title='Download a text file of the data in JSON format', id="btn_download2")
+            ),
+        ])
+    ], style={'width': '100%'}),
     html.Br(),
     html.Br(),
     html.Div(
@@ -118,7 +146,7 @@ components = [
         id='x_axis_units'
     ),
     html.Br(),
-    html.Button("Download Plotted Data", title='Download a text file of the data in JSON format', id="btn_download2"),
+
     dcc.Download(id="download-text-index")
     ]
 
