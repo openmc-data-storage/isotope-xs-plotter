@@ -21,9 +21,20 @@ app = dash.Dash(
         # A description of the app, used by e.g.
         # search engines when displaying search results.
         {
-            "name": "XSPlot neutron cross section plotter",
-            "content": "Plot neutron cross sections",
-            "keywords": "plot neutron nuclear cross section energy barns database plotter tendl",
+            "name": "title",
+            "content": "XSPlot neutron cross section plotter"
+        },
+        {
+            "name": "description",
+            "content": "Online graph plotting tool for neutron cross sections from a range of nuclear data including TENDL ENDF"
+        },
+        {
+            "name": "keywrds",
+            "keywords": "plot neutron nuclear cross section energy barns database plotter tendl endf"
+        },
+        {
+            "name":"author",
+            "content":"Jonathan Shimwell"
         },
         # A tag that tells Internet Explorer (IE)
         # to use the latest renderer version available
@@ -65,10 +76,17 @@ components = [
         # style={'font-family': 'Georgia, serif'},
         style={'text-align': 'center'}
     ),
-    html.H3(
-        "Filter and search the cross sections database and select neutron cross sections to plot",
-        style={'text-align': 'center'}
+    html.Div(
+        html.H3([
+        'Filter and search the cross sections database by isotope, reaction, ',
+        html.A('MT reaction number', href='https://t2.lanl.gov/nis/endf/mts.html'),
+        ' or other table headings and then select neutron cross sections to plot'
+        # style={'text-align': 'center', "display": "inline-block"},)
+    ]),
+    id='heading2'
     ),
+    # 
+
     # html.H3('Powered by OpenMC, Plotly, Dash, Dash datatable, Flask, Gunicorn, Docker, GCloud, GitHub, Python, Arrow'),
     html.H4(
         'Hint! Column filtering uses "contains" logic. Filtering with  > < = are also supported. For example =56 would find entries equal to 56.',
