@@ -256,7 +256,6 @@ def get_uuid_from_row(row):
     library = row["Library"].to_string(index=False)
     incident_particle_symbol = "n"
     reaction = row["MT reaction number"].to_string(index=False)
-    reaction_description = row["Reaction products"].to_string(index=False)
 
     if library == "TENDL-2019":
         temperature = "294K"
@@ -312,7 +311,6 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
         library = row["Library"].to_string().split()[1]
 
         fn = library + "_json/" + uuid + ".json"
-        # print('filename loading', fn)
         with open(fn) as json_file:
             xs = load(json_file)
 
@@ -406,7 +404,6 @@ def func2(n_clicks, selected_rows):
                 all_x_y_data = []
                 for k, v in downloaded_xs_data.items():
                     if k in selected_rows:
-                        # print(downloaded_xs_data[k]["legend"])
                         all_x_y_data.append(downloaded_xs_data[k])
 
                 return dict(
