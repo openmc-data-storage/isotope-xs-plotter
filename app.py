@@ -1,13 +1,27 @@
-from os import link
-from typing import Text
+from json import dumps, load
+
 import dash
 from dash.dependencies import Input, Output
+from dash_core_components import Download, Graph, RadioItems, Slider
+from dash_html_components import (
+    H1,
+    H3,
+    H4,
+    H5,
+    A,
+    Br,
+    Button,
+    Div,
+    Iframe,
+    Label,
+    Table,
+    Th,
+    Title,
+    Tr,
+)
 from dash_html_components.Label import Label
-import dash_table
-import dash_core_components as dcc
-import dash_html_components as html
+from dash_table import DataTable
 from pandas import read_hdf
-import json
 
 df = read_hdf("all_indexes.h5", "/data/d1")
 
@@ -20,22 +34,16 @@ app = dash.Dash(
     meta_tags=[
         # A description of the app, used by e.g.
         # search engines when displaying search results.
-        {
-            "name": "title",
-            "content": "XSPlot neutron cross section plotter"
-        },
+        {"name": "title", "content": "XSPlot neutron cross section plotter"},
         {
             "name": "description",
-            "content": "Online graph plotting tool for neutron cross sections from a range of nuclear data including TENDL ENDF"
+            "content": "Online graph plotting tool for neutron cross sections from a range of nuclear data including TENDL ENDF",
         },
         {
             "name": "keywrds",
-            "keywords": "plot neutron nuclear cross section energy barns database plotter tendl endf"
+            "keywords": "plot neutron nuclear cross section energy barns database plotter tendl endf",
         },
-        {
-            "name":"author",
-            "content":"Jonathan Shimwell"
-        },
+        {"name": "author", "content": "Jonathan Shimwell"},
         # A tag that tells Internet Explorer (IE)
         # to use the latest renderer version available
         # to that browser (e.g. Edge)
@@ -61,39 +69,36 @@ server = app.server
 
 components = [
     # guide on plotly html https://dash.plotly.com/dash-html-components
-    html.Title("xsplot.com nuclear cross section plotting"),
-    html.Iframe(
+    Title("xsplot.com nuclear cross section plotting"),
+    Iframe(
         src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
         width="170",
         height="30",
         title="GitHub",
         style={"border": 0, "scrolling": "0"},
     ),
-    html.H1(
+    H1(
         "XSPlot - Neutron cross section plotter",
         # TODO find a nicer font
         # style={'font-family': 'Times New Roman, Times, serif'},
         # style={'font-family': 'Georgia, serif'},
-        style={'text-align': 'center'}
+        style={"text-align": "center"},
     ),
-    html.Div(
-        html.H3([
-        'Filter and search the cross sections database by isotope, reaction, ',
-        html.A('MT reaction number', href='https://t2.lanl.gov/nis/endf/mts.html'),
-        ' or other table headings and then select neutron cross sections to plot'
-        # style={'text-align': 'center', "display": "inline-block"},)
-    ]),
-    id='heading2'
+    Div(
+        H3(
+            [
+                "Filter and search the cross sections database by isotope, reaction, ",
+                A("MT reaction number", href="https://t2.lanl.gov/nis/endf/mts.html"),
+                " or other table headings and then select neutron cross sections to plot",
+            ]
+        ),
+        id="heading2",
     ),
-    # 
-
-    # html.H3('Powered by OpenMC, Plotly, Dash, Dash datatable, Flask, Gunicorn, Docker, GCloud, GitHub, Python, Arrow'),
-    html.H4(
+    H4(
         'Hint! Column filtering uses "contains" logic. Filtering with  > < = are also supported. For example =56 would find entries equal to 56.',
-        style={'text-align': 'center', "color": "red"},
+        style={"text-align": "center", "color": "red"},
     ),
-    dash_table.DataTable(
-        # style_cell={'fontSize':20, 'font-family':'sans-serif'}
+    DataTable(
         id="datatable-interactivity",
         columns=[
             {"name": i, "id": i, "selectable": True}
@@ -113,19 +118,19 @@ components = [
         page_current=0,
         page_size=15,
     ),
-    html.Table(
+    Table(
         [
-            html.Tr(
+            Tr(
                 [
-                    html.Th(
-                        html.Button(
+                    Th(
+                        Button(
                             "clear selection",
                             title="Clear all selected data. You can also temporarily hide plots by clicked them in the legend",
                             id="clear",
                         )
                     ),
-                    html.Th(
-                        dcc.RadioItems(
+                    Th(
+                        RadioItems(
                             options=[
                                 {"label": "log X axis", "value": "log"},
                                 {"label": "linear X axis", "value": "linear"},
@@ -137,27 +142,24 @@ components = [
                     ),
                 ]
             ),
-            html.Tr([html.Br()]),
-            html.Tr(
+            Tr([Br()]),
+            Tr(
                 [
-                    html.Th(
-                        # html.H5('X axis scale'),
-                        html.Button(
+                    Th(
+                        Button(
                             "Download Plotted Data",
                             title="Download a text file of the data in JSON format",
                             id="btn_download2",
                         )
                     ),
-                    html.Th(
-                        # html.H5('Y axis scale'),
-                        dcc.RadioItems(
+                    Th(
+                        RadioItems(
                             options=[
                                 {"label": "log Y axis", "value": "log"},
                                 {"label": "linear Y axis", "value": "linear"},
                             ],
                             value="log",
                             id="yaxis_scale",
-                            # labelStyle={'display': 'inline-block'},
                         ),
                     ),
                 ]
@@ -165,65 +167,68 @@ components = [
         ],
         style={"width": "100%"},
     ),
-    # html.Br(),
-    html.Br(),
-    html.Div(id="datatable-interactivity-container"),
-    # TODO move components to a table layout
-    # https://dash.plotly.com/dash-html-components/td
-    # https://dash.plotly.com/dash-html-components/tr
-    # https://dash.plotly.com/dash-html-components/table
-    # https://stackoverflow.com/questions/52213738/html-dash-table
-    html.H5("X axis units"),
-    dcc.Slider(
+    Br(),
+    Div(id="datatable-interactivity-container"),
+    H5("X axis units"),
+    Slider(
         min=0,
         max=4,
         marks={i: f"{s}" for i, s in enumerate(["μeV", "eV", "keV", "MeV", "GeV"])},
         value=1,
         id="x_axis_units",
     ),
-    dcc.Download(id="download-text-index"),
-    html.Br(),
-    html.Div([
-        html.Label('XSPlot is an open-source project powered by '),
-        html.A('OpenMC', href='https://docs.openmc.org/en/stable/'),
-        html.Label(', '),
-        html.A(' Plotly', href='https://plotly.com/'),
-        html.Label(', '),
-        html.A(' Dash', href='https://dash.plotly.com/'),
-        html.Label(', '),
-        html.A(' Dash datatable', href='https://dash.plotly.com/datatable'),
-        html.Label(', '),
-        html.A(' Flask', href='https://flask.palletsprojects.com/en/2.0.x/'),
-        html.Label(', '),
-        html.A(' Gunicorn', href='https://gunicorn.org/'),
-        html.Label(', '),
-        html.A(' Docker', href='https://www.docker.com'),
-        html.Label(', '),
-        html.A(' GCloud', href='https://cloud.google.com'),
-        html.Label(', '),
-        html.A(' Python', href='https://www.python.org/'),
-        html.Label(' the with source code available on '),
-        html.A(' GitHub', href='https://github.com/openmc-data-storage/xsplot.com'),
-    ],style={'text-align': 'center'}),
-    html.Br(),
-    html.Div([
-        html.Label('Links to alternative cross section plotting websites: '),
-        html.A('NEA JANIS', href='https://www.oecd-nea.org/jcms/pl_39910/janis'),
-        html.Label(', '),
-        html.A(' IAEA ENDF', href='https://www-nds.iaea.org/exfor/endf.htm'),
-        html.Label(', '),
-        html.A(' NNDC Sigma', href='https://www.nndc.bnl.gov/sigma/'),
-        html.Label(', '),
-        html.A(' Nuclear Data Center JAEA', href='https://wwwndc.jaea.go.jp/ENDF_Graph/'),
-        html.Label(', '),
-        html.A('T2 LANL', href='https://t2.lanl.gov/nis/data/endf/index.html'),
-        html.Label(', '),
-        html.A('Nuclear Data Center KAERI', href='https://atom.kaeri.re.kr'),
-    ],style={'text-align': 'center'}),
+    Download(id="download-text-index"),
+    Br(),
+    Div(
+        [
+            Label("XSPlot is an open-source project powered by "),
+            A("OpenMC", href="https://docs.openmc.org/en/stable/"),
+            Label(", "),
+            A(" Plotly", href="https://plotly.com/"),
+            Label(", "),
+            A(" Dash", href="https://dash.plotly.com/"),
+            Label(", "),
+            A(" Dash datatable", href="https://dash.plotly.com/datatable"),
+            Label(", "),
+            A(" Flask", href="https://flask.palletsprojects.com/en/2.0.x/"),
+            Label(", "),
+            A(" Gunicorn", href="https://gunicorn.org/"),
+            Label(", "),
+            A(" Docker", href="https://www.docker.com"),
+            Label(", "),
+            A(" GCloud", href="https://cloud.google.com"),
+            Label(", "),
+            A(" Python", href="https://www.python.org/"),
+            Label(" the with source code available on "),
+            A(" GitHub", href="https://github.com/openmc-data-storage/xsplot.com"),
+        ],
+        style={"text-align": "center"},
+    ),
+    Br(),
+    Div(
+        [
+            Label("Links to alternative cross section plotting websites: "),
+            A("NEA JANIS", href="https://www.oecd-nea.org/jcms/pl_39910/janis"),
+            Label(", "),
+            A(" IAEA ENDF", href="https://www-nds.iaea.org/exfor/endf.htm"),
+            Label(", "),
+            A(" NNDC Sigma", href="https://www.nndc.bnl.gov/sigma/"),
+            Label(", "),
+            A(
+                " Nuclear Data Center JAEA",
+                href="https://wwwndc.jaea.go.jp/ENDF_Graph/",
+            ),
+            Label(", "),
+            A("T2 LANL", href="https://t2.lanl.gov/nis/data/endf/index.html"),
+            Label(", "),
+            A("Nuclear Data Center KAERI", href="https://atom.kaeri.re.kr"),
+        ],
+        style={"text-align": "center"},
+    ),
 ]
 
 
-app.layout = html.Div(components)
+app.layout = Div(components)
 
 
 @app.callback(
@@ -309,7 +314,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
         fn = library + "_json/" + uuid + ".json"
         # print('filename loading', fn)
         with open(fn) as json_file:
-            xs = json.load(json_file)
+            xs = load(json_file)
 
         xs["plot"] = True
         xs["legend"] = "{}{} (n,{}) {}".format(
@@ -350,9 +355,9 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
     xs_units = "(b)"
 
     if len(selected_rows) != 0:
-        # return html.H1('Select cross sections in the table above to start plotting')
+        # return H1('Select cross sections in the table above to start plotting')
         return [
-            dcc.Graph(
+            Graph(
                 config=dict(showSendToCloud=True),
                 figure={
                     "data": all_x_y_data,
@@ -401,11 +406,11 @@ def func2(n_clicks, selected_rows):
                 all_x_y_data = []
                 for k, v in downloaded_xs_data.items():
                     if k in selected_rows:
-                        print(downloaded_xs_data[k]["legend"])
+                        # print(downloaded_xs_data[k]["legend"])
                         all_x_y_data.append(downloaded_xs_data[k])
 
                 return dict(
-                    content=json.dumps(all_x_y_data, indent=2),
+                    content=dumps(all_x_y_data, indent=2),
                     filename="xsplot_download.json",
                 )
 
