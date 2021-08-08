@@ -211,7 +211,7 @@ components = [
             A(" GCloud", href="https://cloud.google.com"),
             Label(", "),
             A(" Python", href="https://www.python.org/"),
-            Label(" the with source code available on "),
+            Label(" with the source code available on "),
             A(" GitHub", href="https://github.com/openmc-data-storage/xsplot.com"),
         ],
         style={"text-align": "center"},
