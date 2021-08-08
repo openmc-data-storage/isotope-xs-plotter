@@ -128,6 +128,7 @@ components = [
         page_action="native",
         page_current=0,
         page_size=15,
+        style_cell={'fontSize':16, 'font-family':'sans-serif'},
     ),
     Table(
         [
