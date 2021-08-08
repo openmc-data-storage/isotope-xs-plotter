@@ -85,6 +85,17 @@ components = [
         style={"text-align": "center"},
     ),
     Div(
+        Iframe(
+            src="https://www.youtube.com/embed/aWXS9AqSkEk",
+            width="560",
+            height="315",
+            title="Tutorial video",
+            # style={},
+            style={"text-align": "center", "border": 0, "scrolling": "0"},
+        ),
+        style={"text-align": "center"},
+    ),
+    Div(
         H3(
             [
                 "Filter and search the cross sections database by isotope, reaction, ",
