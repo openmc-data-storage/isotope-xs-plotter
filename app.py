@@ -371,6 +371,8 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
                 figure={
                     "data": all_x_y_data,
                     "layout": {
+                        "height":800,
+                        # "width":1600,
                         "margin": {"l": 3, "r": 2, "t": 15, "b": 60},
                         "xaxis": {
                             "title": {"text": f"Energy {energy_units}"},
@@ -384,7 +386,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
                             "type": yaxis_scale,
                             "tickformat": ".1e",
                         },
-                        "showlegend": True
+                        "showlegend": True,
                         # "height": 250,
                         # "margin": {"t": 10, "l": 10, "r": 10},
                     },
