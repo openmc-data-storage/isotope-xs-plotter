@@ -69,9 +69,9 @@ server = app.server
 
 components = [
     # guide on plotly html https://dash.plotly.com/dash-html-components
-    Title("xsplot.com nuclear cross section plotting"),
+    Title("xsplot.com isotope cross section plotting"),
     Iframe(
-        src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=xsplot.com&type=star&count=true&size=large",
+        src="https://ghbtns.com/github-btn.html?user=openmc-data-storage&repo=isotope-xs-plotter&type=star&count=true&size=large",
         width="170",
         height="30",
         title="GitHub",
@@ -100,14 +100,11 @@ components = [
             [
                 "Filter and search the cross sections database by isotope, reaction, ",
                 A("MT reaction number", href="https://t2.lanl.gov/nis/endf/mts.html"),
-                " or other table headings and then select neutron cross sections to plot",
+                " or other table headings and then select neutron cross sections to plot. ",
+                "Use logical expressions = < > to perform advanced filtering."
             ]
         ),
         id="heading2",
-    ),
-    H4(
-        'Hint! Column filtering uses "contains" logic. Filtering with  > < = are also supported. For example =56 would find entries equal to 56.',
-        style={"text-align": "center", "color": "red"},
     ),
     DataTable(
         id="datatable-interactivity",

@@ -130,3 +130,8 @@ dmypy.json
 
 # openmc cross section files
 *.h5
+
+# test nuclear data
+*_json/
+convert.py
+download.py
