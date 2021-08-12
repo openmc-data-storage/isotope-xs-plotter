@@ -78,7 +78,7 @@ components = [
         style={"border": 0, "scrolling": "0"},
     ),
     H1(
-        "XSPlot - Neutron cross section plotter",
+        "XSPlot - Neutron cross section plotter for isotopes",
         # TODO find a nicer font
         # style={'font-family': 'Times New Roman, Times, serif'},
         # style={'font-family': 'Georgia, serif'},
@@ -209,7 +209,7 @@ components = [
             Label(", "),
             A(" Python", href="https://www.python.org/"),
             Label(" with the source code available on "),
-            A(" GitHub", href="https://github.com/openmc-data-storage/xsplot.com"),
+            A(" GitHub", href="https://github.com/openmc-data-storage"),
         ],
         style={"text-align": "center"},
     ),
@@ -359,7 +359,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
     x_axis_units_text = {0: "μeV", 1: "eV", 2: "keV", 3: "MeV", 4: "GeV"}
 
     energy_units = f"({x_axis_units_text[x_axis_units]})"
-    xs_units = "(b)"
+    xs_units = "[barns]"
 
     if len(selected_rows) != 0:
         # return H1('Select cross sections in the table above to start plotting')
@@ -380,7 +380,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
                         },
                         "yaxis": {
                             "automargin": True,
-                            "title": {"text": f"Cross Section {xs_units}"},
+                            "title": {"text": f"Microscopic Cross Section {xs_units}"},
                             "type": yaxis_scale,
                             "tickformat": ".1e",
                         },
