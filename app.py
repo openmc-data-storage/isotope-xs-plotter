@@ -40,7 +40,7 @@ app = dash.Dash(
             "content": "Online graph plotting tool for neutron cross sections from a range of nuclear data including TENDL ENDF",
         },
         {
-            "name": "keywrds",
+            "name": "keywords",
             "keywords": "plot neutron nuclear cross section energy barns database plotter tendl endf",
         },
         {"name": "author", "content": "Jonathan Shimwell"},
@@ -58,7 +58,7 @@ app = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-app.title = "XSPlot neutron cross section plotter"
+app.title = "XSPlot \U0001f4c9 neutron cross section plotter \U0001f4c8"
 app.description = "Plot neutron cross sections. Nuclear data from the TENDL library."
 # TODO add description, current google says Dash in description area
 # https://github.com/plotly/dash/blob/1a40162dfce654b885e475ecb280d3cca9bff0a5/dash/dash.py#L193
