@@ -96,15 +96,43 @@ components = [
         style={"text-align": "center"},
     ),
     Div(
+        [
         H3(
             [
-                "Filter and search the cross sections database by isotope, reaction, ",
-                A("MT reaction number", href="https://t2.lanl.gov/nis/endf/mts.html"),
-                " or other table headings and then select neutron cross sections to plot. ",
-                "Use logical expressions = < > to perform advanced filtering."
-            ]
+                "\U0001f50e Search the cross sections database using any of the table headings. \U0001f50d",
+            ],
+            style={'text-align': 'center'}
         ),
-        id="heading2",
+        H3(
+            [
+                "Make use of logical expressions to refine the database filtering \U0001f449 = < > "
+                #  "Make use of \U0001f449 ", A("MT reaction number", href="https://t2.lanl.gov/nis/endf/mts.html"),
+                # " or other table headings and then select neutron cross sections to plot. ",
+                # "Use logical expressions = < > to perform advanced filtering."
+            ],
+            style={'text-align': 'center'}
+        ),        
+        H3(
+            [
+                "\U0000269b Make use of standard MT numbers to identify reactions \U0001f449 ", A("reaction descriptions \U0001f517",href="https://t2.lanl.gov/nis/endf/mts.html") ,
+                # " or other table headings and then select neutron cross sections to plot. ",
+                # "Use logical expressions = < > to perform advanced filtering."
+            ],
+            style={'text-align': 'center'}
+        ),
+        H3(
+            [
+                '\U0001f4c8 The plot should update automatically \U0001f389'
+            ],
+            style={'text-align': 'center'}
+        ),
+        H3(
+            [
+                '\U0001f4c9 Customise you graph and download your cross section data \U0001f4be'
+            ],
+            style={'text-align': 'center'}
+        ),
+        ]
     ),
     DataTable(
         id="datatable-interactivity",
