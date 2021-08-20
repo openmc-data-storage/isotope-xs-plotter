@@ -253,6 +253,8 @@ components = [
             Label(", "),
             A(" IAEA ENDF", href="https://www-nds.iaea.org/exfor/endf.htm"),
             Label(", "),
+            A(" IAEA Libraries", href="https://nds.iaea.org/dataexplorer"),
+            Label(", "),
             A(" NNDC Sigma", href="https://www.nndc.bnl.gov/sigma/"),
             Label(", "),
             A(
