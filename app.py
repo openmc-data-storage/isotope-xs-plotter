@@ -2,7 +2,7 @@ from json import dumps, load
 
 import dash
 from dash.dependencies import Input, Output
-from dash_core_components import Download, Graph, RadioItems, Slider
+from dash_core_components import Download, Graph, RadioItems, Slider, Loading
 from dash_html_components import (
     H1,
     H3,
@@ -205,7 +205,11 @@ components = [
         style={"width": "100%"},
     ),
     Br(),
-    Div(id="datatable-interactivity-container"),
+    Loading(
+        id="loading-1",
+        type="default",
+        children=Div(id="graph_container")
+    ),
     H5("X axis units"),
     Slider(
         min=0,
@@ -248,6 +252,8 @@ components = [
             A("NEA JANIS", href="https://www.oecd-nea.org/jcms/pl_39910/janis"),
             Label(", "),
             A(" IAEA ENDF", href="https://www-nds.iaea.org/exfor/endf.htm"),
+            Label(", "),
+            A(" IAEA Libraries", href="https://nds.iaea.org/dataexplorer"),
             Label(", "),
             A(" NNDC Sigma", href="https://www.nndc.bnl.gov/sigma/"),
             Label(", "),
@@ -313,7 +319,7 @@ def get_uuid_from_row(row):
 
 
 @app.callback(
-    Output("datatable-interactivity-container", "children"),
+    Output("graph_container", "children"),
     [
         Input("datatable-interactivity", "selected_rows"),
         Input("xaxis_scale", "value"),
