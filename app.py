@@ -19,7 +19,8 @@ from dash_html_components import (
     Title,
     Tr,
 )
-from dash_html_components.Label import Label
+
+# todo update imports dash_table
 from dash_table import DataTable
 from pandas import read_hdf
 
