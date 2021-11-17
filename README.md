@@ -1,5 +1,6 @@
-This repository The source code for neutron cross section plotting website [xsplot.com](http://xsplot.com) which
-allows neutron cross sections from TENDL 2019 to be plotted. Other libraries will be added soon.
+This repository contains part of the source code for neutron cross section
+plotting website [xsplot.com](http://xsplot.com) which allows neutron cross
+sections for isotopes to be plotted. 
 
 This repository contains:
 - A Python [Plotly Dash](https://plotly.com/dash/) based GUI 🐍
@@ -14,85 +15,26 @@ with the following commands.
 
 First clone the repositoy
 ```bash
-git clone https://github.com/openmc-data-storage/xsplot.com.git
+git clone https://github.com/openmc-data-storage/isotope-xs-plotter.git
 ```
 
 Then navigate into the repositoy folder
 ```bash
-cd xsplot
+cd isotope-xs-plotter
 ```
 
 Then build the docker image
 ```bash
-docker build -t xsplot .
+docker build -t isotope-xs-plotter .
 ```
 
 Then run the docker image
 ```bash
-docker run --network host -t xsplot
+docker run --network host -t isotope-xs-plotter
 ```
 
 The URL of your locally hosted version should appear in the terminal, copy and paste this URL into a web browser address bar.
 
-# Development install
-
-Should you want to install the app locally here are some installation instructions for Ubuntu. You will need Python3, Pip and a few Gb of disk space.
-
-Install dependencies for this app
-```python
-pip install -r requirements.txt 
-```
-
-Install dependencies for processing the nuclear data
-```
-pip install pandas
-pip install openmc_data_downloader
-pip install openmc_data_to_json
-```
-
-Download and process some nuclear data
-```
-import pandas as pd
-import json
-import os
-import pathlib
-
-import openmc_data_downloader as odd
-import openmc_data_to_json as odj
-
-
-odd.just_in_time_library_generator(
-    libraries='TENDL-2019',
-    elements='all',
-    destination='TENDL-2019'
-)
-
-odj.cross_section_h5_files_to_json_files(
-    filenames = list(pathlib.Path('TENDL-2019').glob('*.h5')),
-    output_dir = 'TENDL-2019_json',
-    library='TENDL-2019',
-    index_filename='TENDL-2019_index.json'
-)
-
-
-f = open('TENDL-2019_json/TENDL-2019_index.json')
-data = json.load(f)
-df = pd.json_normalize(data)
-
-for col in df.columns:
-    df[col] = df[col].astype(str)
-
-h5File = "all_indexes.h5"
-df.to_hdf(h5File, "/data/d1")
-
-os.system('rm -rf TENDL-2019')
-```
-
-Run the app and then navigate to the url printed in the terminal
-
-```
-python app.py
-```
 
 # Maintenance
 
