@@ -10,4 +10,4 @@ authors:
 title: "XSPlot - Neutron cross section plotter for isotopes"
 version: 0.0.5
 date-released: 2021-8-6
-url: "https://github.com/fusion-energy/paramak"
+url: "https://github.com/openmc-data-storage/isotope-xs-plotter"
