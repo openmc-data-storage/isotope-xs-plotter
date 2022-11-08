@@ -453,6 +453,9 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range
                         fig["layout"]["xaxis"]["range"]=float_values
                 except:
                     print('float conversion or splitting failed')
+        else:
+            print("x range disabled")
+            fig["layout"]["xaxis"]["range"]=None
         if y_range is not None:
                 try:
                     values = y_range.split(',')
@@ -462,8 +465,8 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range
                 except:
                     print('float conversion or splitting failed')
         else:
-            print("x range disabled")
-            fig["layout"]["xaxis"]["range"]=None
+            print("y range disabled")
+            fig["layout"]["yaxis"]["range"]=None
         
         # fig.update_xaxes(range=[x_range_lower, x_range_upper])
 
