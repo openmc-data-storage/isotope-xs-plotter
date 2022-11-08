@@ -4,21 +4,21 @@ sections for isotopes to be plotted.
 
 This repository contains:
 - A Python [Plotly Dash](https://plotly.com/dash/) based GUI 🐍
-- A Dockerfile that provides the hosting enviroment 🐳
+- A Dockerfile that provides the hosting environment 🐳
 
 # Run locally
 
-You can view the hosted version of this repositoy here [xsplot.com](http://xsplot.com). However you might want to host your own version locally.
+You can view the hosted version of this repository here [xsplot.com](http://xsplot.com). However you might want to host your own version locally.
 
 To host your own local version of [xsplot.com](http://xsplot.com) you will need [Docker](https://www.docker.com/) installed and then can build and run the Dockerfile
 with the following commands.
 
-First clone the repositoy
+First clone the repository
 ```bash
 git clone https://github.com/openmc-data-storage/isotope-xs-plotter.git
 ```
 
-Then navigate into the repositoy folder
+Then navigate into the repository folder
 ```bash
 cd isotope-xs-plotter
 ```

@@ -4,22 +4,6 @@ import dash
 from dash.dependencies import Input, Output
 
 from dash import html
-#     H1,
-#     H3,
-#     H4,
-#     H5,
-#     A,
-#     Br,
-#     Button,
-#     Div,
-#     Iframe,
-#     Label,
-#     Table,
-#     Th,
-#     Title,
-#     Tr,
-# )
-
 from dash import dcc
 
 # todo update imports dash_table
@@ -222,6 +206,24 @@ components = [
         value=1,
         id="x_axis_units",
     ),
+    html.H5("X axis range (comma delimitated)"),
+    dcc.Input(
+            id="x_range",
+            type='text',
+            #value, # units of eV
+            placeholder='lower limit, upper limit'
+            # min=1,
+            # step=1e6
+    ),
+    html.H5("Y axis range (comma delimitated)"),
+    dcc.Input(
+            id="y_range",
+            type='text',
+            #value, # units of eV
+            placeholder='lower limit, upper limit'
+            # min=1,
+            # step=1e6
+    ),
     dcc.Download(id="download-text-index"),
     html.Br(),
     html.Div(
@@ -329,9 +331,11 @@ def get_uuid_from_row(row):
         Input("xaxis_scale", "value"),
         Input("yaxis_scale", "value"),
         Input("x_axis_units", "value"),
-    ],
+        Input("x_range", "value"),
+        Input("y_range", "value"),
+    ]
 )
-def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
+def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range, y_range):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -396,37 +400,78 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units):
     # https://github.com/Shimwell/database_GUI/blob/d670ca88feef8f41a0f20abd30bdb2a82cbab6bd/src/App.js#L305-L329
     x_axis_units_text = {0: "μeV", 1: "eV", 2: "keV", 3: "MeV", 4: "GeV"}
 
-    energy_units = f"({x_axis_units_text[x_axis_units]})"
+    energy_units = f"[{x_axis_units_text[x_axis_units]}]"
     xs_units = "[barns]"
 
+    print('x_range')
+    
+    print(x_range)
+          
     if len(selected_rows) != 0:
+        fig={
+            "data": all_x_y_data,
+            "layout": {
+                "height":800,
+                # "width":1600,
+                "margin": {"l": 3, "r": 2, "t": 15, "b": 60},
+                "xaxis": {
+                    "title": {"text": f"Energy {energy_units}"},
+                    "type": xaxis_scale,
+                    "tickformat": ".1e",
+                    "tickangle": 45,
+                    "rangemode": 'nonnegative'
+                },
+                "yaxis": {
+                    "automargin": True,
+                    "title": {"text": f"Microscopic Cross Section {xs_units}"},
+                    "type": yaxis_scale,
+                    "tickformat": ".1e",
+                },
+                "showlegend": True,
+                # "height": 250,
+                # "margin": {"t": 10, "l": 10, "r": 10},
+            },
+        }
+        try:
+            print(f'len {len(x_range.split(","))}')
+        except:
+            pass
+        try:
+            print(f'is 0 numerical {x_range.split(",")[0].isnumeric()}')
+        except:
+            pass
+        try:
+            print(f'is 0 numerical {x_range.split(",")[1].isnumeric()}')
+        except:
+            pass
+
+        if x_range is not None:
+                try:
+                    values = x_range.split(',')
+                    if len(values)==2:
+                        float_values = (float(values[0]), float(values[1]))
+                        fig["layout"]["xaxis"]["range"]=float_values
+                except:
+                    print('float conversion or splitting failed')
+        if y_range is not None:
+                try:
+                    values = y_range.split(',')
+                    if len(values)==2:
+                        float_values = (float(values[0]), float(values[1]))
+                        fig["layout"]["yaxis"]["range"]=float_values
+                except:
+                    print('float conversion or splitting failed')
+        else:
+            print("x range disabled")
+            fig["layout"]["xaxis"]["range"]=None
+        
+        # fig.update_xaxes(range=[x_range_lower, x_range_upper])
+
         # return H1('Select cross sections in the table above to start plotting')
         return [
             dcc.Graph(
-                config=dict(showSendToCloud=True),
-                figure={
-                    "data": all_x_y_data,
-                    "layout": {
-                        "height":800,
-                        # "width":1600,
-                        "margin": {"l": 3, "r": 2, "t": 15, "b": 60},
-                        "xaxis": {
-                            "title": {"text": f"Energy {energy_units}"},
-                            "type": xaxis_scale,
-                            "tickformat": ".1e",
-                            "tickangle": 45,
-                        },
-                        "yaxis": {
-                            "automargin": True,
-                            "title": {"text": f"Microscopic Cross Section {xs_units}"},
-                            "type": yaxis_scale,
-                            "tickformat": ".1e",
-                        },
-                        "showlegend": True,
-                        # "height": 250,
-                        # "margin": {"t": 10, "l": 10, "r": 10},
-                    },
-                },
+                # config=dict(showSendToCloud=True),
+                figure=fig
             )
         ]
 
