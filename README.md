@@ -4,7 +4,7 @@ sections for isotopes to be plotted.
 
 This repository contains:
 - A Python [Plotly Dash](https://plotly.com/dash/) based GUI 🐍
-- A Dockerfile that provides the hosting enviroment 🐳
+- A Dockerfile that provides the hosting environment 🐳
 
 # Run locally
 
