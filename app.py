@@ -165,6 +165,25 @@ components = [
                             labelStyle={"display": "inline-block"},
                         ),
                     ),
+                    html.Th(
+                        # html.H5("X axis range (comma delimitated)"),
+                        html.Div(title='Enter both X lower and X upper limit to use, works best on linear X scale.', children=[
+                            dcc.Input(
+                                    id="x_lower_limit",
+                                    type='text',
+                                    placeholder='X axis lower limit in eV'
+                            ),
+                        ]),
+                    ),
+                    html.Th(
+                        html.Div(title='Enter both X lower and X upper limit to use, works best on linear X scale.', children=[
+                            dcc.Input(
+                                    id="x_upper_limit",
+                                    type='text',
+                                    placeholder='X axis lower limit in eV'
+                            ),
+                        ]),
+                    ),
                 ]
             ),
             html.Tr([html.Br()]),
@@ -187,6 +206,26 @@ components = [
                             id="yaxis_scale",
                         ),
                     ),
+                    # TODO add slider from SO
+                    # https://stackoverflow.com/questions/61896144/dash-range-slider-with-input-on-each-side
+                    html.Th(
+                        html.Div(title='Enter both Y lower and Y upper limit to use, works best on linear Y scale.', children=[
+                            dcc.Input(
+                                    id="y_lower_limit",
+                                    type='text',
+                                    placeholder='Y axis lower limit in eV',
+                            ),
+                        ]),
+                    ),
+                    html.Th(
+                        html.Div(title='Enter both Y lower and Y upper limit to use, works best on linear Y scale.', children=[
+                            dcc.Input(
+                                    id="y_upper_limit",
+                                    type='text',
+                                    placeholder='Y axis upper limit in eV'
+                            ),
+                        ]),
+                    ),
                 ]
             ),
         ],
@@ -205,24 +244,6 @@ components = [
         marks={i: f"{s}" for i, s in enumerate(["μeV", "eV", "keV", "MeV", "GeV"])},
         value=1,
         id="x_axis_units",
-    ),
-    html.H5("X axis range (comma delimitated)"),
-    dcc.Input(
-            id="x_range",
-            type='text',
-            #value, # units of eV
-            placeholder='lower limit, upper limit'
-            # min=1,
-            # step=1e6
-    ),
-    html.H5("Y axis range (comma delimitated)"),
-    dcc.Input(
-            id="y_range",
-            type='text',
-            #value, # units of eV
-            placeholder='lower limit, upper limit'
-            # min=1,
-            # step=1e6
     ),
     dcc.Download(id="download-text-index"),
     html.Br(),
@@ -331,11 +352,22 @@ def get_uuid_from_row(row):
         Input("xaxis_scale", "value"),
         Input("yaxis_scale", "value"),
         Input("x_axis_units", "value"),
-        Input("x_range", "value"),
-        Input("y_range", "value"),
+        Input("x_lower_limit", "value"),
+        Input("x_upper_limit", "value"),
+        Input("y_lower_limit", "value"),
+        Input("y_upper_limit", "value"),
     ]
 )
-def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range, y_range):
+def update_graphs(
+    selected_rows,
+    xaxis_scale,
+    yaxis_scale,
+    x_axis_units,
+    x_lower_limit,
+    x_upper_limit,
+    y_lower_limit,
+    y_upper_limit,
+):
     # When the table is first rendered, `derived_virtual_data` and
     # `selected_rows` will be `None`. This is due to an
     # idiosyncracy in Dash (unsupplied properties are always None and Dash
@@ -403,10 +435,7 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range
     energy_units = f"[{x_axis_units_text[x_axis_units]}]"
     xs_units = "[barns]"
 
-    print('x_range')
-    
-    print(x_range)
-          
+
     if len(selected_rows) != 0:
         fig={
             "data": all_x_y_data,
@@ -432,45 +461,27 @@ def update_graphs(selected_rows, xaxis_scale, yaxis_scale, x_axis_units, x_range
                 # "margin": {"t": 10, "l": 10, "r": 10},
             },
         }
-        try:
-            print(f'len {len(x_range.split(","))}')
-        except:
-            pass
-        try:
-            print(f'is 0 numerical {x_range.split(",")[0].isnumeric()}')
-        except:
-            pass
-        try:
-            print(f'is 0 numerical {x_range.split(",")[1].isnumeric()}')
-        except:
-            pass
 
-        if x_range is not None:
-                try:
-                    values = x_range.split(',')
-                    if len(values)==2:
-                        float_values = (float(values[0]), float(values[1]))
-                        fig["layout"]["xaxis"]["range"]=float_values
-                except:
-                    print('float conversion or splitting failed')
+        if x_upper_limit is not None and x_lower_limit is not None:
+            try:
+                float_values = (float(x_lower_limit), float(x_upper_limit))
+                fig["layout"]["xaxis"]["range"]=float_values
+            except:
+                fig["layout"]["xaxis"]["range"]=None
         else:
-            print("x range disabled")
             fig["layout"]["xaxis"]["range"]=None
-        if y_range is not None:
-                try:
-                    values = y_range.split(',')
-                    if len(values)==2:
-                        float_values = (float(values[0]), float(values[1]))
-                        fig["layout"]["yaxis"]["range"]=float_values
-                except:
-                    print('float conversion or splitting failed')
-        else:
-            print("y range disabled")
-            fig["layout"]["yaxis"]["range"]=None
-        
-        # fig.update_xaxes(range=[x_range_lower, x_range_upper])
 
-        # return H1('Select cross sections in the table above to start plotting')
+        if y_upper_limit is not None and y_lower_limit is not None:
+            try:
+                float_values = (float(y_lower_limit), float(y_upper_limit))
+                fig["layout"]["yaxis"]["range"]=float_values
+            except:
+                fig["layout"]["yaxis"]["range"]=None
+                
+        else:
+            fig["layout"]["yaxis"]["range"]=None
+
+
         return [
             dcc.Graph(
                 # config=dict(showSendToCloud=True),
