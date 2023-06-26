@@ -180,7 +180,7 @@ components = [
                             dcc.Input(
                                     id="x_upper_limit",
                                     type='text',
-                                    placeholder='X axis lower limit in eV'
+                                    placeholder='X axis upper limit in eV'
                             ),
                         ]),
                     ),
@@ -213,7 +213,7 @@ components = [
                             dcc.Input(
                                     id="y_lower_limit",
                                     type='text',
-                                    placeholder='Y axis lower limit in eV',
+                                    placeholder='Y axis lower limit in Barns',
                             ),
                         ]),
                     ),
@@ -222,7 +222,7 @@ components = [
                             dcc.Input(
                                     id="y_upper_limit",
                                     type='text',
-                                    placeholder='Y axis upper limit in eV'
+                                    placeholder='Y axis upper limit in Barns'
                             ),
                         ]),
                     ),
